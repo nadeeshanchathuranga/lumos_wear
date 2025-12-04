@@ -347,42 +347,8 @@
         </div>
       </div>
     </div>
-    <div class="flex md:flex-row flex-col items-center justify-center w-full h-full md:space-x-4 md:space-y-0 space-y-4 ">
-      <!-- Chart 1 -->
-      <!-- <div
-                class="flex flex-col justify-between items-center w-1/3 bg-white border-4 border-black rounded-xl h-[450px]">
-                <div class="chart-container">
-                   <h2 class="text-2xl font-medium tracking-wide text-slate-700 text-center pb-4 pt-12">
-                      Sales by Category
-                   </h2>
-
-                   <Doughnut :data="chartData2" :options="chartOptions2" />
-                </div>
-                </div> -->
-      <!-- <div
-        class="flex flex-col justify-between items-center md:w-1/2 w-full bg-white border-4 border-black rounded-xl h-[500px] p-4"
-      >
-        <div class="chart-container w-full h-full relative p-4">
-          <div class="w-full flex justify-between items-center pb-4">
-            <h2
-              class="text-2xl font-medium tracking-wide text-slate-700 text-left"
-            >
-              Top Products Stock Chart
-            </h2>
-            <button
-              @click="downloadTopProductsStockPDF"
-              class="w-full mt-6 px-4 py-2 text-md font-normal tracking-wider text-white bg-orange-600 rounded-lg custom-select hover:bg-orange-700 hover:shadow-lg"
-            >
-              Download PDF
-            </button>
-          </div>
-
-          <Doughnut :data="chartData5" :options="chartOptions5" />
-        </div>
-      </div> -->
-
-
-      <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+    <!-- Products Stock Table -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
   <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
     Top Products Stock Table
   </h2>
@@ -473,11 +439,88 @@
   </div>
 </div>
 
+<!-- Sales Transactions Table -->
+<div class="w-full bg-white border-4 border-black rounded-xl p-6 mt-8">
+  <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+    Sales Transactions
+  </h2>
 
-
-
-
+  <!-- Buttons and Total Row -->
+  <div class="flex justify-between items-center pb-4">
+    <!-- Left: Download Button -->
+    <div class="flex gap-4">
+      <button
+        @click="downloadSalesPDF"
+        class="px-4 py-2 text-md font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-md"
+      >
+        Download PDF
+      </button>
     </div>
+
+    <!-- Right: Total Stats -->
+    <div class="flex gap-4">
+      <div class="py-3 px-6 border-2 border-green-600 rounded-xl bg-green-400 shadow-lg text-center">
+        <h2 class="text-lg font-extrabold text-black uppercase">Total Sales:
+          <span class="text-xl font-bold text-black">
+            {{ sales.length }}
+          </span>
+        </h2>
+      </div>
+      <div class="py-3 px-6 border-2 border-blue-600 rounded-xl bg-blue-400 shadow-lg text-center">
+        <h2 class="text-lg font-extrabold text-black uppercase">Total Amount:
+          <span class="text-xl font-bold text-black">
+            {{ totalSaleAmount.toLocaleString() }} LKR
+          </span>
+        </h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto max-h-[400px] border rounded-xl mt-4">
+    <table
+      id="salesTbl"
+      class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md table-auto"
+    >
+      <thead>
+        <tr class="bg-gradient-to-r from-green-700 via-green-600 to-green-700 text-white text-[14px] border-b border-green-800">
+          <th class="p-3 text-left font-semibold">#</th>
+          <th class="p-3 text-left font-semibold">Sale ID</th>
+          <th class="p-3 text-center font-semibold">Date</th>
+          <th class="p-3 text-center font-semibold">Customer</th>
+          <th class="p-3 text-center font-semibold">Employee</th>
+          <th class="p-3 text-center font-semibold">Payment Method</th>
+          <th class="p-3 text-center font-semibold">Items</th>
+          <th class="p-3 text-center font-semibold">Total Cost (LKR)</th>
+          <th class="p-3 text-center font-semibold">Total Amount (LKR)</th>
+          <th class="p-3 text-center font-semibold">Discount (LKR)</th>
+          <th class="p-3 text-center font-semibold">Net Profit (LKR)</th>
+        </tr>
+      </thead>
+
+      <tbody class="text-[12px] font-medium">
+        <tr
+          v-for="(sale, index) in sales"
+          :key="sale.id"
+          class="border-b transition duration-200 hover:bg-gray-100"
+        >
+          <td class="p-3 text-center">{{ index + 1 }}</td>
+          <td class="p-3 font-bold">{{ sale.id || "N/A" }}</td>
+          <td class="p-3 text-center">{{ new Date(sale.sale_date).toLocaleDateString() }}</td>
+          <td class="p-3 text-center">{{ sale.customer?.name || "Walk-in" }}</td>
+          <td class="p-3 text-center">{{ sale.employee?.name || "N/A" }}</td>
+          <td class="p-3 text-center">{{ sale.payment_method || "N/A" }}</td>
+          <td class="p-3 text-center">{{ sale.sale_items?.length || 0 }}</td>
+          <td class="p-3 text-center">{{ (parseFloat(sale.total_cost) || 0).toFixed(2) }}</td>
+          <td class="p-3 text-center">{{ (parseFloat(sale.total_amount) || 0).toFixed(2) }}</td>
+          <td class="p-3 text-center">{{ (parseFloat(sale.discount || 0) + parseFloat(sale.custom_discount || 0)).toFixed(2) }}</td>
+          <td class="p-3 text-center">
+            {{ ((parseFloat(sale.total_amount) || 0) - (parseFloat(sale.total_cost) || 0) - (parseFloat(sale.discount) || 0) - (parseFloat(sale.custom_discount) || 0)).toFixed(2) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
 <!-- Batch Management -->
 
@@ -756,6 +799,98 @@ const downloadTable = () => {
   saveAs(blob, "Top_Products_Stock.xlsx");
 };
 
+// Sales PDF Download Function
+const downloadSalesPDF = () => {
+  const doc = new jsPDF("l", "mm", "a4"); // Landscape, A4 size for better width
+
+  // Title for the PDF
+  doc.setFontSize(18);
+  doc.text("Sales Transactions Report", 14, 15);
+
+  // Add date range if available
+  if (startDate.value && endDate.value) {
+    doc.setFontSize(12);
+    doc.text(`Period: ${startDate.value} to ${endDate.value}`, 14, 25);
+  }
+
+  // Prepare table headers
+  const tableColumn = [
+    "#",
+    "Sale ID",
+    "Date",
+    "Customer",
+    "Employee",
+    "Payment Method",
+    "Items",
+    "Total Cost",
+    "Total Amount",
+    "Discount",
+    "Net Profit",
+  ];
+
+  // Prepare table data
+  const tableRows = sales.value.map((sale, index) => [
+    index + 1,
+    sale.id || "N/A",
+    new Date(sale.sale_date).toLocaleDateString(),
+    sale.customer?.name || "Walk-in",
+    sale.employee?.name || "N/A",
+    sale.payment_method || "N/A",
+    sale.sale_items?.length || 0,
+    (sale.total_cost || 0).toFixed(2),
+    (sale.total_amount || 0).toFixed(2),
+    ((sale.discount || 0) + (sale.custom_discount || 0)).toFixed(2),
+    ((sale.total_amount || 0) - (sale.total_cost || 0) - (sale.discount || 0) - (sale.custom_discount || 0)).toFixed(2),
+  ]);
+
+  // Calculate totals
+  const totalCost = sales.value.reduce((sum, sale) => sum + (sale.total_cost || 0), 0);
+  const totalAmount = sales.value.reduce((sum, sale) => sum + (sale.total_amount || 0), 0);
+  const totalDiscounts = sales.value.reduce((sum, sale) => sum + (sale.discount || 0) + (sale.custom_discount || 0), 0);
+  const totalProfit = totalAmount - totalCost - totalDiscounts;
+
+  // Add a total row at the end
+  tableRows.push([
+    "",
+    "TOTAL",
+    "",
+    "",
+    "",
+    "",
+    "",
+    totalCost.toFixed(2),
+    totalAmount.toFixed(2),
+    totalDiscounts.toFixed(2),
+    totalProfit.toFixed(2),
+  ]);
+
+  // Adjust column widths for landscape
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: startDate.value && endDate.value ? 30 : 25,
+    theme: "striped",
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [34, 139, 34] }, // Green header
+    columnStyles: {
+      0: { cellWidth: 10 },  // #
+      1: { cellWidth: 18 },  // Sale ID
+      2: { cellWidth: 25 },  // Date
+      3: { cellWidth: 30 },  // Customer
+      4: { cellWidth: 30 },  // Employee
+      5: { cellWidth: 30 },  // Payment Method
+      6: { cellWidth: 15 },  // Items
+      7: { cellWidth: 25 },  // Total Cost
+      8: { cellWidth: 25 },  // Total Amount
+      9: { cellWidth: 20 },  // Discount
+      10: { cellWidth: 25 }, // Net Profit
+    },
+    margin: { left: 5, right: 5, top: 20 },
+  });
+
+  // Save the PDF
+  doc.save("Sales_Transactions_Report.pdf");
+};
 
 
 // const totalRetailValue = computed(() => {

@@ -107,12 +107,12 @@
                             <td class="p-4 font-bold border-gray-200">{{ history.payment_method || "N/A" }}</td>
                             <td class="p-4 font-bold border-gray-200">{{ history.sale_date || "N/A" }}</td>
                             <td class="p-4 font-bold border-gray-200">
-                                <!-- <button
+                                <button
                                     @click="printReceipt(history)"
                                     class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 mr-4"
                                 >
                                     Print
-                                </button> -->
+                                </button>
                                 <button class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600" @click="deleteReceipt(history.order_id)">
                                     Delete
                                 </button>
@@ -192,6 +192,158 @@ $(document).ready(function () {
     },
   });
 });
+
+const printReceipt = (history) => {
+  // --- Safe helpers ---
+  const n = (v) => Number(v ?? 0);
+  const f2 = (v) => (Number(v ?? 0)).toFixed(2);
+
+  // Get sale items from history
+  const products = history.sale_items || [];
+  
+  // --- Calculate totals ---
+  const subTotal = products.reduce(
+    (sum, p) => sum + n(p.price) * n(p.quantity),
+    0
+  );
+
+  const totalDiscount = n(history.discount);
+  const customDiscount = n(history.custom_discount);
+  const total = n(history.total_amount);
+  const cash = n(history.amount_paid);
+  const balance = n(history.balance_amount);
+
+  // --- Build product rows ---
+  const productRows = products
+    .map((product) => {
+      return `
+        <tr>
+          <td>${product.product?.name ?? "Item"}</td>
+          <td style="text-align:center;">${n(product.quantity)}</td>
+          <td>${f2(product.price)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  // --- Receipt HTML ---
+  const receiptHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Receipt</title>
+<style>
+  @media print {
+    body { margin:0; padding:0; -webkit-print-color-adjust:exact; }
+  }
+  body {
+    background-color:#ffffff; font-size:12px; font-family:"Arial",sans-serif;
+    margin:0; padding:10px; color:#000;
+  }
+  .header { text-align:center; margin-bottom:16px; }
+  .header h1 { font-size:20px; font-weight:bold; margin:0; }
+  .header p { font-size:10px; margin:4px 0; }
+  .section { margin-bottom:16px; padding-top:8px; border-top:1px solid #000; }
+  .info-row { display:flex; justify-content:space-between; font-size:12px; margin-top:8px; }
+  .info-row p { margin:0; font-weight:bold; }
+  .info-row small { font-weight:normal; }
+  table { width:100%; font-size:12px; border-collapse:collapse; margin-top:8px; table-layout:fixed; }
+  table th, table td { padding:6px 8px; word-wrap:break-word; }
+  table th { text-align:left; }
+  table td { text-align:right; }
+  table td:first-child { text-align:left; }
+  .totals { border-top:1px solid #000; padding-top:8px; font-size:12px; }
+  .totals div { display:flex; justify-content:space-between; margin-bottom:8px; }
+  .totals div:nth-child(4) { font-size:14px; font-weight:bold; }
+  .footer { text-align:center; font-size:10px; margin-top:16px; }
+  .footer p { margin:6px 0; }
+  .footer .italic { font-style:italic; }
+</style>
+</head>
+<body>
+  <div class="receipt-container">
+    <div class="header">
+      <img src="/images/billlogo.png" style="width:300px;height:120px;" />
+      ${props.companyInfo?.name ? `<h1>${props.companyInfo.name}</h1>` : '<h1</h1>'}
+      ${props.companyInfo?.address ? `<p>${props.companyInfo.address}</p>` : ''}
+      ${
+        (props.companyInfo?.phone || props.companyInfo?.phone2 || props.companyInfo?.email)
+          ? `<p>${props.companyInfo.phone || ''} | ${props.companyInfo.phone2 || ''} ${props.companyInfo.email || ''}</p>`
+          : ''
+      }
+    </div>
+
+    <div class="section">
+      <div class="info-row">
+        <div><p>Date:</p><small>${history.sale_date || new Date().toLocaleDateString()}</small></div>
+        <div><p>Order No:</p><small>${history.order_id ?? ''}</small></div>
+      </div>
+      <div class="info-row">
+        <div><p>Customer:</p><small>${history.customer?.name ?? 'Walk-in'}</small></div>
+        <div><p>Cashier:</p><small>${history.employee?.name ?? 'N/A'}</small></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <table>
+        <colgroup>
+          <col style="width:60%;">
+          <col style="width:15%;">
+          <col style="width:25%;">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Items</th>
+            <th style="text-align:center;">Qty</th>
+            <th style="text-align:right;">Price</th>
+          </tr>
+        </thead>
+        <tbody style="font-size:11px;">
+          ${productRows}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="totals">
+      <div><span>Sub Total</span><span>${f2(subTotal)} LKR</span></div>
+      <div><span>Discount</span><span>${f2(totalDiscount)} LKR</span></div>
+      <div><span>Custom Discount</span><span>${f2(customDiscount)} LKR</span></div>
+      <div><span>Total</span><span>${f2(total)} LKR</span></div>
+      <div><span>Cash</span><span>${f2(cash)} LKR</span></div>
+      <div style="font-weight:bold;"><span>Balance</span><span>${f2(balance)} LKR</span></div>
+    </div>
+
+    <div class="footer">
+      <p style="font-weight:bold; font-style:italic; padding:4px 0; font-size:14px; color:#000;">
+        මාරු කිරීම සඳහා දින 07 ඇතුලත බිල්පත සමග පැමිණෙන්න.
+      </p>
+      <p>THANK YOU COME AGAIN</p>
+      <p class="italic">Let the quality define its own standards</p>
+      <p style="font-weight:bold;">Powered by JAAN Network Ltd.</p>
+      <p>${new Date().toLocaleTimeString()}</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    alert("Failed to open print window. Please check your browser settings.");
+    return;
+  }
+  printWindow.document.open();
+  printWindow.document.write(receiptHTML);
+  printWindow.document.close();
+
+  printWindow.onload = () => {
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
+};
 
  const handlePrintReceipt = () => {
   // --- Safe helpers ---
