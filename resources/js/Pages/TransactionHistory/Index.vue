@@ -239,34 +239,34 @@ const printReceipt = (history) => {
     body { margin:0; padding:0; -webkit-print-color-adjust:exact; }
   }
   body {
-    background-color:#ffffff; font-size:12px; font-family:"Arial",sans-serif;
-    margin:0; padding:10px; color:#000;
+    background-color:#ffffff; font-size:10px; font-family:"Arial",sans-serif;
+    margin:0; padding:5px; color:#000;
   }
-  .header { text-align:center; margin-bottom:16px; }
-  .header h1 { font-size:20px; font-weight:bold; margin:0; }
-  .header p { font-size:10px; margin:4px 0; }
-  .section { margin-bottom:16px; padding-top:8px; border-top:1px solid #000; }
-  .info-row { display:flex; justify-content:space-between; font-size:12px; margin-top:8px; }
+  .header { text-align:center; margin-bottom:8px; }
+  .header h1 { font-size:16px; font-weight:bold; margin:0 0 2px 0; }
+  .header p { font-size:9px; margin:2px 0; }
+  .section { margin-bottom:8px; padding-top:4px; border-top:1px dashed #000; }
+  .info-row { display:flex; justify-content:space-between; font-size:10px; margin-top:4px; }
   .info-row p { margin:0; font-weight:bold; }
   .info-row small { font-weight:normal; }
-  table { width:100%; font-size:12px; border-collapse:collapse; margin-top:8px; table-layout:fixed; }
-  table th, table td { padding:6px 8px; word-wrap:break-word; }
+  table { width:100%; font-size:10px; border-collapse:collapse; margin-top:4px; table-layout:fixed; }
+  table th, table td { padding:3px 4px; word-wrap:break-word; }
   table th { text-align:left; }
   table td { text-align:right; }
   table td:first-child { text-align:left; }
-  .totals { border-top:1px solid #000; padding-top:8px; font-size:12px; }
-  .totals div { display:flex; justify-content:space-between; margin-bottom:8px; }
-  .totals div:nth-child(4) { font-size:14px; font-weight:bold; }
-  .footer { text-align:center; font-size:10px; margin-top:16px; }
-  .footer p { margin:6px 0; }
+  .totals { border-top:1px dashed #000; padding-top:4px; font-size:10px; }
+  .totals div { display:flex; justify-content:space-between; margin-bottom:3px; }
+  .totals div:nth-child(4) { font-size:12px; font-weight:bold; }
+  .footer { text-align:center; font-size:8px; margin-top:8px; border-top:1px dashed #000; padding-top:4px; }
+  .footer p { margin:2px 0; }
   .footer .italic { font-style:italic; }
 </style>
 </head>
 <body>
   <div class="receipt-container">
     <div class="header">
-      <img src="/images/billlogo.png" style="width:300px;height:120px;" />
-      ${props.companyInfo?.name ? `<h1>${props.companyInfo.name}</h1>` : '<h1</h1>'}
+      <img src="/images/billlogo.png" style="width:100px;height:100px;" />
+      ${props.companyInfo?.name ? `<h1>${props.companyInfo.name}</h1>` : '<h1>LUMOS WEAR</h1>'}
       ${props.companyInfo?.address ? `<p>${props.companyInfo.address}</p>` : ''}
       ${
         (props.companyInfo?.phone || props.companyInfo?.phone2 || props.companyInfo?.email)
@@ -316,9 +316,6 @@ const printReceipt = (history) => {
     </div>
 
     <div class="footer">
-      <p style="font-weight:bold; font-style:italic; padding:4px 0; font-size:14px; color:#000;">
-        මාරු කිරීම සඳහා දින 07 ඇතුලත බිල්පත සමග පැමිණෙන්න.
-      </p>
       <p>THANK YOU COME AGAIN</p>
       <p class="italic">Let the quality define its own standards</p>
       <p style="font-weight:bold;">Powered by JAAN Network Ltd.</p>
